@@ -1,0 +1,25 @@
+.container {
+    max-width: 900px;
+  }
+  
+  .list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .history {
+    margin-top: 20px;
+  }
+  
+  .table {
+    width: 100%;
+  }
+  
+  .table th, .table td {
+    text-align: center;
+  }
+  .custom-margin {
+    margin-right: 10px;
+}
+  

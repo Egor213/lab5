@@ -10,7 +10,7 @@ export function Router() {
             <a href="/brokers" className="nav-link">Брокеры</a>
           </li>
           <li className="nav-item">
-            <a href="/acrions" className="nav-link">Акции</a>
+            <a href="/stock" className="nav-link">Акции</a>
           </li>
           <li className="nav-item">
             <a href="/bidding" className="nav-link">Торги</a>
