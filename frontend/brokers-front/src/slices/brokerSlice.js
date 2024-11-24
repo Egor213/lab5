@@ -16,7 +16,8 @@ const brokerSlice = createSlice({
         state.brokers.push(user);
     },
     addBroker(state, action) {
-      state.brokers.push(action.payload);
+      const maxId = state.brokers[state.brokers.length - 1].id
+      state.brokers.push({ ...action.payload, id: maxId + 1 });
     },
     updateBroker(state, action) {
       const index = state.brokers.findIndex(broker => broker.id == action.payload.id);

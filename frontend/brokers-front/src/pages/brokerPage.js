@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import BrokerService from '../services/brokerService';
-import { removeBroker, addArrBrokers, addBroker } from '../slices/brokerSlice';
+import { removeBroker, addArrBrokers, addBroker, updateBroker } from '../slices/brokerSlice';
 import 'bootstrap/dist/css/bootstrap.min.css'; 
 import './brokerPage.css'
 
@@ -27,6 +27,7 @@ const BrokerPage = () => {
   const handleDeleteBroker = async (id) => {
     try {
       const result = await BrokerService.deleteBroker(id);
+      console.log(brokers)
       if (result) {
         dispatch(removeBroker(id));
       }
@@ -37,16 +38,23 @@ const BrokerPage = () => {
 
   const handleEditBroker = (broker) => {
     setEditingBroker(broker);
-    setChangeBroker({ name: changeBroker.name, balance: changeBroker.balance });
+    setChangeBroker({ name: broker.name, balance: broker.balance });
   };
+  
 
   const handleSaveBroker = async () => {
     try {
       if (editingBroker) {
-        await BrokerService.updateBroker(editingBroker.id, newBroker);
-        dispatch(removeBroker(editingBroker.id)); 
-        dispatch(addArrBrokers([newBroker])); 
-        setEditingBroker(null);
+        const res = await BrokerService.updateBroker(editingBroker.id, changeBroker);
+        if (res) {
+            dispatch(updateBroker({
+                id: editingBroker.id,
+                name: changeBroker.name,
+                balance: parseInt(changeBroker.balance)
+            }))
+            setEditingBroker(null);
+            setChangeBroker({ name: '', balance: '' })
+        }    
       }
     } catch (error) {
       console.error('Ошибка сохранения брокера:', error);
@@ -54,7 +62,6 @@ const BrokerPage = () => {
   };
 
   const handleAddBroker = async () => {
-    console.log(brokers)
     try {
       const addedBroker = await BrokerService.addBroker(newBroker);
       if (addedBroker) {
@@ -126,14 +133,14 @@ const BrokerPage = () => {
               type="text"
               className="form-control mb-2"
               placeholder="Имя брокера"
-              value={editingBroker.name}
+              value={changeBroker.name}
               onChange={(e) => setChangeBroker({ ...changeBroker, name: e.target.value })}
             />
             <input
               type="number"
               className="form-control mb-2"
               placeholder="Баланс"
-              value={editingBroker.balance}
+              value={changeBroker.balance}
               onChange={(e) => setChangeBroker({ ...changeBroker, balance: e.target.value })}
             />
             <button className="btn btn-success custom-margin" onClick={handleSaveBroker}>Сохранить изменения</button>

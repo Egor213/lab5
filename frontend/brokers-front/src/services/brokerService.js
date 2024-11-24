@@ -16,6 +16,11 @@ const BrokerService = {
     newBroker.balance = parseInt(newBroker.balance)
     const response = await axios.post(API_URL + `/list-brokers/create`, newBroker);
     return response.data;
+  },
+
+  updateBroker: async(id, data) => {
+    const response = await axios.put(API_URL + `/list-brokers/update-broker/${id}`, data);
+    return response.data
   }
 
  
