@@ -45,6 +45,10 @@ const BrokerPage = () => {
 
   const handleSaveBroker = async () => {
     try {
+      if (changeBroker.balance < 0) {
+        alert('Поменял')
+        return;
+      }
       if (editingBroker) {
         const res = await BrokerService.updateBroker(editingBroker.id, changeBroker);
         if (res) {
