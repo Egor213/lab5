@@ -13,6 +13,7 @@ const BrokerPage = () => {
   const [editingBroker, setEditingBroker] = useState(null);
 
   useEffect(() => {
+    localStorage.removeItem('stocks')
     const fetchBrokers = async () => {
       try {
         const brokersData = await BrokerService.getBrokers();
@@ -63,6 +64,10 @@ const BrokerPage = () => {
 
   const handleAddBroker = async () => {
     try {
+        if(newBroker.name == '' || newBroker.balance == '' || newBroker.balance < 0) {
+            alert("Введите данные, баланс не должен быть отрицательным!")
+            return
+        }
       const addedBroker = await BrokerService.addBroker(newBroker);
       if (addedBroker) {
         dispatch(addBroker(newBroker));

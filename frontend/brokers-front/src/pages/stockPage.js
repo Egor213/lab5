@@ -4,7 +4,7 @@ import StockService from '../services/stockService';
 import { setAllStocks, toggleStockSelection } from '../slices/stockSlice';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './stockPage.css';
-import StockChart from './StockChart'; // Импортируем компонент для графика
+import StockChart from './StockChart'; 
 
 const StockPage = () => {
   const dispatch = useDispatch();
@@ -15,6 +15,7 @@ const StockPage = () => {
   const recordsPerPage = 15;
 
   useEffect(() => {
+    localStorage.removeItem('stocks')
     const fetchStocks = async () => {
       try {
         const historyData = await StockService.getAllStocks();
@@ -30,6 +31,16 @@ const StockPage = () => {
 
   const handleSelectStock = (id) => {
     dispatch(toggleStockSelection(id));
+    let mass = []
+    for (let obj of stocks) {
+      if (obj.id == id) {
+        if (obj.selected) continue
+        mass.push(obj.label)
+      }else if (obj.selected) {
+        mass.push(obj.label)
+      }
+    }
+    localStorage.setItem('stocks', mass)
   };
 
   const handleStockClick = (stock) => {
