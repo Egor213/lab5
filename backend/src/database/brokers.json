@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Egor",
+    "balance": 100,
+    "id": 2
+  },
+  {
+    "name": "Test42",
+    "balance": 0,
+    "id": 3
+  }
+]
