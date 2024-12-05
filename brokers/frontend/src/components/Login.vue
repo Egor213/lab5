@@ -5,7 +5,7 @@
       <div class="mb-3">
         <select v-model="username" class="form-control">
           <option disabled value="">Выберите имя</option>
-          <option v-for="user in users" :key="user" :value="user">{{ user }}</option>
+          <option v-for="user in nameUsers" :key="user" :value="user"> {{ user.name }}</option>
         </select>
       </div>
       <button @click="login" class="btn btn-primary w-100">Войти</button>
@@ -14,30 +14,43 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, toRaw } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
+import {BASE_API} from '../constants'
+
+
+const nameUsers = ref(null);
+
+const fetchData = async () => {
+  const response = await axios.get(BASE_API + 'list-brokers');
+  nameUsers.value = response.data;
+};
+
+
 
 const username = ref('');
-const users = ref(['user1', 'user2', 'user3']);  // Список доступных пользователей
 const router = useRouter();
-const login = () => {
-  console.log(username)
-}
 
-// const login = () => {
-//   if (username.value && password.value === 'password') {
-//     localStorage.setItem('isAuthenticated', 'true');
-//     router.push({ name: 'Profile' }); 
-//   } else {
-//     alert('Неверное значение');
-//   }
-// };
+const login = () => {
+  if (username.value) {
+    localStorage.setItem('user', username.value.id);
+    router.push({ name: 'Profile' }); 
+  } else {
+    alert('Неверное значение');
+  }
+};
+
+
+fetchData();
 </script>
 
 <style scoped>
 .login-container {
   height: 100vh;
 }
+
+
 
 .card {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
