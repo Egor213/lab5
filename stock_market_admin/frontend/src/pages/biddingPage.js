@@ -21,7 +21,6 @@ const BiddingPage = () => {
             setStockPrices(data.stockPrices);
         }
         setCurrentDate(data.currentDate);
-      
     });
 
     return () => {
