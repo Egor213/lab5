@@ -27,7 +27,7 @@
             <div v-for="(stock, index) in broker.stocks" :key="index" class="row mb-3">
               <div class="col-12">
 
-                <div v-if="!isStartTrading" class="card p-3">
+                <div class="card p-3">
                   <h5 class="card-title pb-1">{{ stock.label }}</h5>
                   <p class="card-text">Количество: {{ stock.amount }}</p>
                   <p class="card-text">Цена одной акции: {{ stock.price.toLocaleString('en-US') }} $</p>
@@ -35,34 +35,14 @@
                   <p class="card-text">
                     Общая стоимость: {{ (stock.amount * stock.price).toLocaleString('en-US') }} $
                   </p>
-                  <p class="card-text">Торги не начались!</p>
-                </div>
-
-                <div v-if="isStartTrading && !checkInTrading(stock.label)" class="card p-3">
-                  <h5 class="card-title pb-1">{{ stock.label }}</h5>
-                  <p class="card-text">Количество: {{ stock.amount }}</p>
-                  <p class="card-text">Цена одной акции: {{ stock.price.toLocaleString('en-US') }} $</p>
-                  <p class="card-text">На момент: {{ stock.date_buy }}</p>
-                  <p class="card-text">
-                    Общая стоимость: {{ (stock.amount * stock.price).toLocaleString('en-US') }} $
-                  </p>
-                  <p class="card-text">
-                      Данная акция не участвует в торгах
+                  <p v-if="!isStartTrading" class="card-text">Торги не начались!</p>
+                  <p v-if="isStartTrading" class="card-text">
+                    <p v-if="checkInTrading(stock.label)">Выгода: {{ (startBalanceBroker[broker.id][stock.label] - (stock.price * stock.amount)).toLocaleString('en-US') }} $ </p>
+                    <p v-if="!checkInTrading(stock.label)">Данная акция не участвует в торгах</p>
                   </p>
                 </div>
 
-                <div v-if="isStartTrading && checkInTrading(stock.label)" class="card p-3">
-                  <h5 class="card-title pb-1">{{ stock.label }}</h5>
-                  <p class="card-text">Количество: {{ stock.amount }}</p>
-                  <p class="card-text">Цена одной акции: {{ getPrice(stock.label) ? getPrice(stock.label) :  stock.price}} $</p>
-                  <p class="card-text">На момент: {{ currentDate }}</p>
-                  <p class="card-text">
-                    Общая стоимость: {{ (stock.amount * getPrice(stock.label)).toLocaleString('en-US') }} $
-                  </p>
-                  <p class="card-text">
-                      Выгода: {{ (stock.price - getPrice(stock.label)).toLocaleString('en-US') }} $
-                  </p>
-                </div>
+                
 
 
               </div>
@@ -89,9 +69,20 @@ const visibleOff = ref(false);
 const currentDate = ref(null);
 let pricesList;
 let lastStatePrices;
+let startBalanceBroker = {};
+
+
 
 const getBrokersData = async () => {
   const response = await axios.get(BASE_API + 'list-brokers');
+  for (let broker of response.data) {
+    if (!(broker.id in startBalanceBroker)) {
+        startBalanceBroker[broker.id] = [];
+    }
+    for (let stock of broker.stocks) {
+      startBalanceBroker[broker.id][stock.label] = stock.price * stock.amount
+    }
+  }
   brokers.value = response.data;
 };
 
@@ -129,16 +120,6 @@ socket.on('closeTrading', () => {
   console.log('Торги завершились!');
   isStartTrading.value = false;
   visibleOff.value = true;
-  if (pricesList) {
-  for (let broker of brokers.value) {
-    for (let stock of broker.stocks) {
-        if (checkInTrading(stock.label)) {
-            stock.price = getPrice(stock.label)
-            stock.date_buy = currentDate.value
-        }
-    }
-  }
-}
   setTimeout(() => {
     visibleOff.value = false;
   }, 3000);
@@ -147,16 +128,27 @@ socket.on('closeTrading', () => {
 
 socket.on('tradeUpdate', (data) => {
   if (isStartTrading.value == false) {
+    stocksList = Object.keys(data.stockPrices)
     isStartTrading.value = true
   }
     
   console.log(data);
   currentDate.value = data.currentDate
+
   if (Object.keys(data.stockPrices).length != 0) {
     pricesList = data.stockPrices
     lastStatePrices = data.stockPrices
   } else {
     pricesList = lastStatePrices
+  }
+  for (let broker of brokers.value) {
+    for (let stock of broker.stocks) {
+        if (checkInTrading(stock.label)) {
+            if (pricesList)
+                stock.price = getPrice(stock.label)
+            stock.date_buy = currentDate.value
+        }
+    }
   }
     
 });

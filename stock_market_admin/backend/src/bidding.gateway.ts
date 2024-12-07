@@ -68,6 +68,7 @@ export class BiddingGateway {
       if (new Date(currentDate) > this.maxDate) {
         clearInterval(this.intervalId); 
         console.log('Торговля завершена.');
+        this.socketAdminClient.forEach(adminSocket => adminSocket.emit('closeTrading'));
       }
 
     }, tradeSpeed * 1000); 

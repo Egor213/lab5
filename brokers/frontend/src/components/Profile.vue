@@ -6,6 +6,7 @@
         <div>
           <h2>Имя брокера: <span class="fw-bold">{{ broker.name }}</span></h2>
           <p class="fs-3 ">Баланс: <span class="fs-4 text-success fw-bold"> {{ broker.balance.toLocaleString('en-US') }}  $</span></p>
+          <p class="fs-3 ">Стоимость всех акции: <span class="fs-4 text-success fw-bold"> {{ broker.priceStocks().toLocaleString('en-US') }}  $</span></p>
         </div>
         <div>
           <h3>Акции в наличии</h3>
@@ -32,13 +33,19 @@ import Navigation from './Navigation.vue';
 import axios from 'axios';
 
 
-
 const broker = ref(null);
 
 const getBrokerData = async () => {
     const id = localStorage.getItem('user')
     const response = await axios.get(BASE_API + 'list-brokers/' + id);
     broker.value = response.data
+    broker.value.priceStocks = () => {
+        let all_sum = 0
+        for (let stock of response.data.stocks) {
+            all_sum += stock.price * stock.amount
+        }
+        return all_sum
+    }
     console.log(broker)
 }
 
