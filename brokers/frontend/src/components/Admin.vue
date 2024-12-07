@@ -1,6 +1,6 @@
 <template>
+    <Navigation />
     <div class="container py-4">
-      <Navigation />
       <h1 class="text-center mb-4">Список всех брокеров</h1>
   
       <div v-if="visible" class="toast-notification m-0">
@@ -36,10 +36,17 @@
                     Общая стоимость: {{ (stock.amount * stock.price).toLocaleString('en-US') }} $
                   </p>
                   <p v-if="!isStartTrading" class="card-text">Торги не начались!</p>
-                  <p v-if="isStartTrading" class="card-text">
-                    <p v-if="checkInTrading(stock.label)">Выгода: {{ (startBalanceBroker[broker.id][stock.label] - (stock.price * stock.amount)).toLocaleString('en-US') }} $ </p>
-                    <p v-if="!checkInTrading(stock.label)">Данная акция не участвует в торгах</p>
-                  </p>
+                  <span v-if="loading">
+                    <p v-if="isStartTrading" class="card-text">
+                        <p v-if="checkInTrading(stock.label)">
+                            Выгода: 
+                            <span :class="{'text-success': ((stock.price * stock.amount) - startBalanceBroker[broker.id][stock.label]) > 0, 'text-danger': ((stock.price * stock.amount) - startBalanceBroker[broker.id][stock.label]) < 0}">
+                                {{ ((stock.price * stock.amount) - startBalanceBroker[broker.id][stock.label]).toLocaleString('en-US') }} $ 
+                            </span>
+                        </p>
+                        <p v-if="!checkInTrading(stock.label)">Данная акция не участвует в торгах</p>
+                    </p>
+                </span>
                 </div>
 
                 
@@ -55,7 +62,7 @@
   
   
   <script setup>
-import { ref } from 'vue';
+import { onUnmounted, ref } from 'vue';
 import { BASE_API } from '../constants';
 import Navigation from './Navigation.vue';
 import axios from 'axios';
@@ -63,65 +70,18 @@ import { io } from 'socket.io-client';
 
 const isStartTrading = ref(false);
 const brokers = ref([]);
-let stocksList;
+let stocksList = ref(null);
 const visible = ref(false);
 const visibleOff = ref(false);
 const currentDate = ref(null);
+const loading = ref(false)
 let pricesList;
 let lastStatePrices;
 let startBalanceBroker = {};
 
 
-
-const getBrokersData = async () => {
-  const response = await axios.get(BASE_API + 'list-brokers');
-  for (let broker of response.data) {
-    if (!(broker.id in startBalanceBroker)) {
-        startBalanceBroker[broker.id] = [];
-    }
-    for (let stock of broker.stocks) {
-      startBalanceBroker[broker.id][stock.label] = stock.price * stock.amount
-    }
-  }
-  brokers.value = response.data;
-};
-
-const checkInTrading = (label) => {
-    for (let obj of stocksList) {
-        if (obj == label)
-            return true
-    }
-    return false
-}
-
-const getPrice = (label) => {
-    for (let stock in pricesList) {
-        if (stock == label)
-            return pricesList[stock]
-    }
-}
-
-const socket = io('http://localhost:4001', { transports: ['websocket'] });
-socket.emit('connectAdminClient');
-
-socket.on('startTrading', (data) => {
-  console.log('Торги начались!');
-  isStartTrading.value = true;
-  
-  stocksList = data.stocksList.split(',');
-  visible.value = true;
-  setTimeout(() => {
-    visible.value = false;
-  }, 3000);
-});
-
-
-socket.on('closeTrading', async () => {
-  console.log('Торги завершились!');
-  isStartTrading.value = false;
-  visibleOff.value = true;
-
-  for (let broker of brokers.value) {
+const saveState = async () => {
+    for (let broker of brokers.value) {
     for (let stock of broker.stocks) {
         if (checkInTrading(stock.label)) {
             const data = {}
@@ -144,6 +104,70 @@ socket.on('closeTrading', async () => {
     }
   }
 
+  for (let broker of brokers.value) {
+        for (let stock of broker.stocks) {
+            startBalanceBroker[broker.id][stock.label] = stock.price * stock.amount
+        }
+    }
+
+}
+
+onUnmounted(async () => {
+  console.log('Отключение от сокета');
+
+  await saveState()
+
+  socket.disconnect();
+});
+
+const getBrokersData = async () => {
+  const response = await axios.get(BASE_API + 'list-brokers');
+  for (let broker of response.data) {
+    if (!(broker.id in startBalanceBroker)) {
+        startBalanceBroker[broker.id] = [];
+    }
+    for (let stock of broker.stocks) {
+      startBalanceBroker[broker.id][stock.label] = stock.price * stock.amount
+    }
+  }
+  brokers.value = response.data;
+};
+
+const checkInTrading = (label) => {
+    return stocksList.value.includes(label);
+}
+
+
+const getPrice = (label) => {
+    for (let stock in pricesList) {
+        if (stock == label)
+            return pricesList[stock]
+    }
+}
+
+const socket = io('http://localhost:4001', { transports: ['websocket'] });
+socket.emit('connectAdminClient');
+
+socket.on('startTrading', (data) => {
+  console.log('Торги начались!');
+  isStartTrading.value = true;
+  
+  stocksList.value = data.stocksList.split(',');
+  visible.value = true;
+  loading.value = true
+  setTimeout(() => {
+    visible.value = false;
+  }, 3000);
+});
+
+
+socket.on('closeTrading', async () => {
+  console.log('Торги завершились!');
+  isStartTrading.value = false;
+  visibleOff.value = true;
+
+  await saveState()
+
   setTimeout(() => {
     visibleOff.value = false;
   }, 3000);
@@ -152,8 +176,12 @@ socket.on('closeTrading', async () => {
 
 socket.on('tradeUpdate', (data) => {
   if (isStartTrading.value == false) {
-    stocksList = Object.keys(data.stockPrices)
-    isStartTrading.value = true
+    stocksList.value = Object.keys(data.stockPrices)
+    if (Object.keys(stocksList.value).length != 0) {
+        isStartTrading.value = true
+        loading.value = true
+    }
+    
   }
     
   console.log(data);

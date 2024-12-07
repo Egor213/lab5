@@ -6,8 +6,8 @@
     "stocks": [
       {
         "label": "AAPL",
-        "date_buy": "2024-11-06",
-        "price": "221.795",
+        "date_buy": "2024-07-17",
+        "price": "235.00",
         "amount": "11"
       },
       {
@@ -26,8 +26,8 @@
       {
         "id": 1,
         "label": "SBUX",
-        "date_buy": "2024-11-06",
-        "price": "96.86",
+        "date_buy": "2024-07-17",
+        "price": "72.21",
         "amount": 24
       }
     ]

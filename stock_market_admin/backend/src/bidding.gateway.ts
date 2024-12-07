@@ -47,11 +47,18 @@ export class BiddingGateway {
     this.intervalId = setInterval(() => {
       let normList = stocksList.split(',');
       let answer: any = {};
+      let otkat = 0;
       for (let label of normList) {
+        while (! this.getPrice(currentDate, label)) {
+          otkat += 1
+          const date = new Date(currentDate);
+          date.setDate(date.getDate() - 1);
+          currentDate = date.toISOString().split('T')[0];
+        }
         answer[label] = this.getPrice(currentDate, label);
       }
       const date = new Date(currentDate);
-      date.setDate(date.getDate() + 1);
+      date.setDate(date.getDate() + otkat + 1);
       currentDate = date.toISOString().split('T')[0];
       console.log(currentDate);
       if (answer) {

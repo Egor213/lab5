@@ -35,7 +35,7 @@ const router = useRouter();
 const login = () => {
   if (username.value) {
     localStorage.setItem('user', username.value.id);
-    router.push({ name: 'Profile' }); 
+    router.push({ name: 'Admin' }); 
   } else {
     alert('Неверное значение');
   }
