@@ -6,10 +6,10 @@ export interface IBroker {
 }
 
 export interface StocksInfo{
-    id: number,
+    id?: number,
     label: string,
     date_buy: string,
-    price: string,
+    price: any,
     amount: number
 }
 

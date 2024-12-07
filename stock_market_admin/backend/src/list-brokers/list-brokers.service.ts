@@ -81,23 +81,45 @@ export class ListBrokersService {
             console.log(`Брокер с id ${id} не найден`);
             return false
         }
-    }
+    } 
 
     updateStocksData(data: StocksInfo, id: number) {
         console.log(data)
         for (let user of this.brokers) {
             if (id == user.id) {
+                let isFound = false
                 for (let stock of user.stocks) {
                     console.log(stock.label, data.label)
                     if (stock.label == data.label) {
+                        isFound = true
                         stock.amount = data.amount
                         stock.date_buy = data.date_buy
                         stock.price = data.price == 'not change' ? stock.price : data.price
                     }
                 }
+                if (!isFound) {
+                    user.stocks.push({
+                        amount: data.amount,
+                        date_buy: data.date_buy,
+                        price: data.price == 'not change' ? 0 : data.price,
+                        label: data.label
+                    })
+                }
             }
         }        
         return this.saveJsonData(this.brokers)
     }
+
+
+    updateBalance(newBalance: number, id: number) {
+        for (let user of this.brokers) {
+            if (id == user.id) {
+                user.balance = newBalance
+            }
+        }        
+        return this.saveJsonData(this.brokers)
+    }
+
+
     
 }

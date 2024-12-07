@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Header, Put } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Header, Put, Query } from '@nestjs/common';
 import { ListBrokersService } from './list-brokers.service';
 import { IBroker, StocksInfo } from 'src/interfaces';
 @Controller('list-brokers')
@@ -13,10 +13,10 @@ export class ListBrokersController {
     getAllBrokers() {
         return this.listBrokersServ.getAllBrokers()
     } 
-
+   
     @Get(':id')
     @Header('Content-Type', 'application/json') 
-    getBrokerById(@Param('id') id: number) {
+    getBrokerById(@Param('id') id: number) { 
         return this.listBrokersServ.getBrokerById(id)
     }
 
@@ -40,7 +40,8 @@ export class ListBrokersController {
             return { message: 'Акция обновлена!' };
         else    
             return { error: 'Не удалось обновить акцию!'}
-    }
+    } 
+    
 
     @Post('delete/:id')
     deleteBroker(@Param('id') id: number) {
@@ -50,6 +51,18 @@ export class ListBrokersController {
     @Put('update-broker/:id')
     updateBroker(@Param('id') id: number, @Body() brokerData: any) {
         return this.listBrokersServ.changeBrokerData(brokerData, id);
+    }
+
+    @Put('update-balance/:id')
+    updateBalance(@Param('id') id: number, @Query() newBalance: any) {
+        if (!('balance' in newBalance)) {
+            console.log("Нет параметра balance!");
+            return { message: "Ошибка: поле balance отсутствует!" };
+        }
+        if (this.listBrokersServ.updateBalance(newBalance.balance, id))
+            return { message: 'Баланс обновлен!' };
+        else    
+            return { error: 'Не удалось обновить баланс!'}
     }
 
 }
