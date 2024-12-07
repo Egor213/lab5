@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { IBroker } from 'src/interfaces';
+import { IBroker, StocksInfo } from 'src/interfaces';
 import * as fs from 'fs';
 import { PATH_TO_BROKERS } from 'src/constants';
 @Injectable()
@@ -81,6 +81,23 @@ export class ListBrokersService {
             console.log(`Брокер с id ${id} не найден`);
             return false
         }
+    }
+
+    updateStocksData(data: StocksInfo, id: number) {
+        console.log(data)
+        for (let user of this.brokers) {
+            if (id == user.id) {
+                for (let stock of user.stocks) {
+                    console.log(stock.label, data.label)
+                    if (stock.label == data.label) {
+                        stock.amount = data.amount
+                        stock.date_buy = data.date_buy
+                        stock.price = data.price == 'not change' ? stock.price : data.price
+                    }
+                }
+            }
+        }        
+        return this.saveJsonData(this.brokers)
     }
     
 }

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Param, Body, Header, Put } from '@nestjs/common';
 import { ListBrokersService } from './list-brokers.service';
-import { IBroker } from 'src/interfaces';
+import { IBroker, StocksInfo } from 'src/interfaces';
 @Controller('list-brokers')
 export class ListBrokersController {
     constructor(
@@ -28,6 +28,18 @@ export class ListBrokersController {
         }        
         this.listBrokersServ.createBroker(brokerData)
         return { message: 'Брокер успешно создан!', brokerData };
+    }
+
+    @Put('update-stock/:id')
+    updateStock(@Param('id') id: number, @Body() stockData: StocksInfo) {
+        if (!('date_buy' in stockData) || !('label' in stockData) || !('price' in stockData) || !('amount' in stockData)) {
+            console.log("Нет всех необходимых полей!");
+            return { message: "Ошибка: поля отсутствуют!" };
+        }  
+        if (this.listBrokersServ.updateStocksData(stockData, id))
+            return { message: 'Акция обновлена!' };
+        else    
+            return { error: 'Не удалось обновить акцию!'}
     }
 
     @Post('delete/:id')

@@ -116,10 +116,34 @@ socket.on('startTrading', (data) => {
 });
 
 
-socket.on('closeTrading', () => {
+socket.on('closeTrading', async () => {
   console.log('Торги завершились!');
   isStartTrading.value = false;
   visibleOff.value = true;
+
+  for (let broker of brokers.value) {
+    for (let stock of broker.stocks) {
+        if (checkInTrading(stock.label)) {
+            const data = {}
+            if (pricesList) {
+                data.price = getPrice(stock.label)
+            } else {
+                data.price = 'not change'
+            }
+            data.date_buy = currentDate.value
+            data.label = stock.label
+            data.amount = stock.amount
+            console.log("data:",data)
+            const result = await axios.put(BASE_API + 'list-brokers/update-stock/' + broker.id, data, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer your-token'
+                }
+            });
+        }
+    }
+  }
+
   setTimeout(() => {
     visibleOff.value = false;
   }, 3000);

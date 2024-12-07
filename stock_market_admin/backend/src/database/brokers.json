@@ -5,14 +5,12 @@
     "id": 2,
     "stocks": [
       {
-        "id": 0,
         "label": "AAPL",
-        "date_buy": "2024-11-15",
-        "price": "226.40",
-        "amount": 9
+        "date_buy": "2024-11-06",
+        "price": "221.795",
+        "amount": "11"
       },
       {
-        "id": 3,
         "label": "CSCO",
         "date_buy": "2024-11-20",
         "price": "56.84",
@@ -28,8 +26,8 @@
       {
         "id": 1,
         "label": "SBUX",
-        "date_buy": "2024-11-22",
-        "price": "100.00",
+        "date_buy": "2024-11-06",
+        "price": "96.86",
         "amount": 24
       }
     ]
@@ -48,7 +46,7 @@
   },
   {
     "name": "Максимум ",
-    "balance": 1e+2,
+    "balance": 100,
     "id": 6,
     "stocks": []
   }
