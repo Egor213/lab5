@@ -12,4 +12,5 @@ import { BiddingGateway } from './bidding.gateway';
   controllers: [AppController, ListBrokersController, StockController],
   providers: [AppService, ListBrokersService, StockService, BiddingGateway],
 })
-export class AppModule {}
+export class AppModule {} 
+ 

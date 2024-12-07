@@ -1,17 +1,55 @@
 [
   {
     "name": "Egor",
-    "balance": 100,
-    "id": 2
+    "balance": 100000000000,
+    "id": 2,
+    "stocks": [
+      {
+        "id": 0,
+        "label": "AAPL",
+        "date_buy": "2024-11-15",
+        "price": "226.40",
+        "amount": 9
+      },
+      {
+        "id": 3,
+        "label": "CSCO",
+        "date_buy": "2024-11-20",
+        "price": "56.84",
+        "amount": 3
+      }
+    ]
   },
   {
     "name": "Test42",
     "balance": 0,
-    "id": 3
+    "id": 3,
+    "stocks": [
+      {
+        "id": 1,
+        "label": "SBUX",
+        "date_buy": "2024-11-22",
+        "price": "100.00",
+        "amount": 24
+      }
+    ]
   },
   {
     "name": "haha",
     "balance": 123,
-    "id": 4
+    "id": 4,
+    "stocks": []
+  },
+  {
+    "name": "hello",
+    "balance": 123144,
+    "id": 5,
+    "stocks": []
+  },
+  {
+    "name": "Максимум ",
+    "balance": 1e+2,
+    "id": 6,
+    "stocks": []
   }
 ]

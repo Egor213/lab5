@@ -4,7 +4,7 @@
       <div class="container-fluid">
         <div class="navbar-nav mx-auto">
           <router-link to="/profile" class="nav-link">Профиль</router-link>
-          <router-link to="/profile" class="nav-link">Список всех участников</router-link>
+          <router-link v-if="admin" to="/admin" class="nav-link">Список всех участников</router-link>
           <router-link to="/profile" class="nav-link">Торги</router-link>
           <router-link to="/login" @click="logout" class="nav-link">Выйти</router-link>
         </div>
@@ -15,6 +15,10 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+
+const admin = ref(null)
+
 const logout = () => {
   localStorage.removeItem('user');
 };
@@ -22,6 +26,13 @@ const logout = () => {
 defineOptions({
   name: 'Navigation'
 });
+
+const setAdmin = () => {
+  if (localStorage.getItem('user') == 2 || localStorage.getItem('user') == 6) {
+    admin.value = true
+  }
+}
+setAdmin();
 </script>
 
 <style scoped>

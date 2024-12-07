@@ -2,13 +2,13 @@ import { SubscribeMessage, WebSocketGateway, WebSocketServer, MessageBody, Conne
 import { Server, Socket } from "socket.io";
 import * as fs from 'fs';
 
-@WebSocketGateway(4001, { transports: ['websocket'] })
+@WebSocketGateway(4001)
 export class BiddingGateway {
   @WebSocketServer() private server: Server;
   private maxDate: Date = new Date('2024-11-23');
   private currentDate = '';
   private intervalId: NodeJS.Timeout | null = null; 
-
+  private socketAdminClient: Socket[] = [];
 
   @SubscribeMessage('startTrading')
   handleStartTrading(
@@ -16,16 +16,30 @@ export class BiddingGateway {
     @ConnectedSocket() socket: Socket
   ): void {
     const { startDate, tradeSpeed, stocksList } = data;
+    this.socketAdminClient.forEach(adminSocket => adminSocket.emit('startTrading', {
+      stocksList: stocksList,
+      startDate: startDate
+    }));
     this.beginTrading(tradeSpeed, stocksList, socket, startDate);
+  }
+
+  @SubscribeMessage('connectAdminClient')
+  connectAdminClient(
+    @ConnectedSocket() socket: Socket
+  ): void {
+    this.socketAdminClient.push(socket);
+    console.log('admin client подключен')
   }
 
   @SubscribeMessage('closeTrading')
   closeTrading(socket: Socket): void {
     if (this.intervalId) {
+      this.socketAdminClient.forEach(adminSocket => adminSocket.emit('closeTrading'));
       clearInterval(this.intervalId);
       console.log('Торговля завершена по запросу');
     }
   }
+
 
   private beginTrading(tradeSpeed: number, stocksList: string, client: Socket, startDate: string) {
     let currentDate: string = startDate;
@@ -45,14 +59,18 @@ export class BiddingGateway {
           currentDate: currentDate,
           stockPrices: answer
         });
+        this.socketAdminClient.forEach(adminSocket => adminSocket.emit('tradeUpdate', {
+          currentDate: currentDate,
+          stockPrices: answer
+        }));
       }
 
-      if (new Date(this.currentDate) > this.maxDate) {
+      if (new Date(currentDate) > this.maxDate) {
         clearInterval(this.intervalId); 
         console.log('Торговля завершена.');
       }
 
-    }, tradeSpeed * 500); 
+    }, tradeSpeed * 1000); 
   }
 
   getPrice(date: string, label: string) {

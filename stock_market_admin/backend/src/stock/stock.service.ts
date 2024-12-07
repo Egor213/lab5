@@ -13,7 +13,7 @@ export class StockService {
     }
 
   getStock(id?: number) {
-    if (!id)
+    if (!id) 
         return this.stocks
     for (let stock of this.stocks) {
         if (stock.id == id) {

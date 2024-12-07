@@ -12,10 +12,10 @@ export class ListBrokersController {
     @Header('Content-Type', 'application/json')
     getAllBrokers() {
         return this.listBrokersServ.getAllBrokers()
-    }
+    } 
 
     @Get(':id')
-    @Header('Content-Type', 'application/json')
+    @Header('Content-Type', 'application/json') 
     getBrokerById(@Param('id') id: number) {
         return this.listBrokersServ.getBrokerById(id)
     }

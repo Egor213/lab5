@@ -23,8 +23,8 @@ export class ListBrokersService {
 
     getAllBrokers() {
         return this.brokers
-    }
-
+    } 
+ 
     getBrokerById(id: number) {
         const broker = this.brokers.find((broker) => broker.id == id);
         return broker || false;
@@ -33,13 +33,14 @@ export class ListBrokersService {
     createBroker(data: IBroker) {
         const max_id = this.brokers[this.brokers.length - 1].id
         data.id = max_id == undefined ? 0 : max_id + 1;
+        data.stocks = [];
         this.brokers.push(data);
         const res = this.saveJsonData(this.brokers)
         if (!res) {
             this.brokers.pop()
             return false
-        }
-        return res
+        } 
+        return res 
     }
 
 

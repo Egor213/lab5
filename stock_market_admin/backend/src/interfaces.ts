@@ -1,7 +1,16 @@
 export interface IBroker {
     id?: number, 
     name: string,
-    balance: number
+    balance: number,
+    stocks: StocksInfo[]
+}
+
+export interface StocksInfo{
+    id: number,
+    lable: string,
+    date_buy: string,
+    price: number,
+    amount: number
 }
 
 export interface IStockHistory {
