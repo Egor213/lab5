@@ -7,7 +7,7 @@
   
       <div class="d-flex justify-content-between align-items-center border p-3 rounded bg-light mb-4">
         <span><strong>Текущая дата:</strong></span>
-        <span v-if="currentDate">{{ currentDate }}</span>
+        <span v-if="currentDate && startTrading">{{ currentDate }}</span>
         <span v-else class="text-muted">Дождитесь начала торгов!</span>
       </div>
   
@@ -291,8 +291,29 @@ const buyStockAction = async () => {
 
 const sellStockAction = () => {
   console.log(`Продано: ${sellAmount.value} акций ${selectedStockLabel.value} по цене ${selectedStockPrice.value}`);
-  // Добавить логику продажи акции
-  closeModal('sell');
+  if (sellAmount.value <= 0) {
+    alert("Нельзя продать ничего!!")
+  } else if (sellAmount.value > getCountStocks(selectedStockLabel.value)) {
+    alert('Нельзя продать акций больше, чем имеется!')
+  } else {
+    const cost = sellAmount.value * selectedStockPrice.value
+    const balanceDifference = parseInt(broker.value.balance) + parseInt(cost);
+    broker.value.balance = balanceDifference
+    for (let i = 0; i < broker.value.stocks.length; i++) {
+        let obj = broker.value.stocks[i];
+        if (obj.label == selectedStockLabel.value) {
+            obj.amount = parseInt(getCountStocks(selectedStockLabel.value)) - parseInt(sellAmount.value);
+            if (obj.amount <= 0) {
+                broker.value.stocks.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+
+    closeModal('sell');
+  }
+  
 };
 
 
