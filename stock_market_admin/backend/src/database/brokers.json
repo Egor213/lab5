@@ -1,7 +1,7 @@
 [
   {
     "name": "Egor",
-    "balance": "53585.9",
+    "balance": "50841",
     "id": 2,
     "stocks": [
       {
@@ -9,12 +9,6 @@
         "date_buy": "2024-11-20",
         "price": "56.84",
         "amount": 3
-      },
-      {
-        "amount": 10,
-        "date_buy": "2023-12-12",
-        "price": "193.11",
-        "label": "AAPL"
       }
     ]
   },
@@ -25,8 +19,8 @@
     "stocks": [
       {
         "label": "SBUX",
-        "date_buy": "2024-05-17",
-        "price": "75.185",
+        "date_buy": "2024-01-03",
+        "price": "95.45",
         "amount": 24
       }
     ]

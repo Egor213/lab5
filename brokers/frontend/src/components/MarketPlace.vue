@@ -59,8 +59,6 @@
     </div>
 
 
-
-        <!-- Модальное окно для покупки акции -->
         <div v-if="showBuyModal" class="modal fade show d-block" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -83,7 +81,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно для продажи акции -->
     <div v-if="showSellModal" class="modal fade show d-block" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -107,8 +104,8 @@
     </div>
 
 
-     <!-- Модальное окно для графика -->
-     <div v-if="showChartModal" class="modal fade show d-block" tabindex="-1" role="dialog">
+  
+    <div v-if="showChartModal" class="modal fade show d-block" tabindex="-1" role="dialog">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -116,8 +113,8 @@
             <button type="button" class="btn-close" @click="closeModal('chart')"></button>
           </div>
           <div class="modal-body">
-            <div class="chart-placeholder">
-              <canvas ref="chartCanvas"></canvas>
+            <div v-if="chartData">
+              <Line :data="chartData" :options="chartOptions" />
             </div>
           </div>
           <div class="modal-footer">
@@ -127,6 +124,7 @@
       </div>
     </div>
 
+
   </template>
   
 <script setup>
@@ -135,18 +133,19 @@ import Navigation from "./Navigation.vue";
 import axios from "axios";
 import { BASE_API } from "../constants";
 import { io } from "socket.io-client";
-import {
-  Chart,
-  Title,
-  Tooltip,
-  Legend,
-  LineElement,
-  PointElement,
+import { Line } from 'vue-chartjs';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+
+ChartJS.register(
   CategoryScale,
   LinearScale,
-  LineController,
-} from 'chart.js';
-const selectedStock = ref(true)
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
 const startTrading = ref(false)
 const loaded = ref(true)
 const currentDate = ref(null);
@@ -188,19 +187,38 @@ socket.emit('connectAdminClient');
 
 socket.on('closeTrading', async () => {
   console.log('Торги завершились!');
+  all_dates = []
+  all_stocks = []
   startTrading.value = false
+  console.log(startTrading.value)
 });
 
-
+let all_dates = [];
+let all_stocks = [];
 socket.on('tradeUpdate', (data) => {
   console.log(data);
   startTrading.value = true
   stocks.value = data.stockPrices
+  all_stocks.push(data.stockPrices)
   currentDate.value = data.currentDate
+  all_dates.push(data.currentDate)
+
+  chartData.value = {
+    labels: [...all_dates],
+    datasets: [
+      {
+        label: 'Цена акции',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        data: [...all_stocks.map(item => parseFloat(item[selectedStockLabel.value]))], 
+      }
+    ]
+  };
+
 });
 
 onUnmounted(() => {
   console.log('Отключение от сокета');
+
   socket.disconnect();
 });
 
@@ -334,8 +352,35 @@ const sellStockAction = async () => {
 
 
 
+const chartData = ref(null);
+const chartOptions = {
+  responsive: true,
+  plugins: {
+    title: {
+      text: 'График изменения цены акции'
+    }
+  },
+  scales: {
+    x: {
+      title: {
+        text: 'Дата'
+      }
+    },
+    y: {
+      title: {
+        text: 'Цена ($)'
+      }
+    }
+  }
+};
 
-Chart.register(Title, Tooltip, Legend, LineController, LineElement, PointElement, CategoryScale, LinearScale);
+
+const openChartModal = (label) => {
+  selectedStockLabel.value = label;
+  showChartModal.value = true;
+};
+
+
 getBrokersData();
 </script>
   
