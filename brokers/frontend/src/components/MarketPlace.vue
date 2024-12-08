@@ -289,7 +289,7 @@ const buyStockAction = async () => {
     }
 };
 
-const sellStockAction = () => {
+const sellStockAction = async () => {
   console.log(`Продано: ${sellAmount.value} акций ${selectedStockLabel.value} по цене ${selectedStockPrice.value}`);
   if (sellAmount.value <= 0) {
     alert("Нельзя продать ничего!!")
@@ -309,6 +309,22 @@ const sellStockAction = () => {
             }
         }
     }
+
+    const id = localStorage.getItem('user')
+        const result1 = await axios.put(BASE_API + 'list-brokers/update-balance/' + id + '?balance=' + balanceDifference)
+        const data = {
+            label: selectedStockLabel.value,
+            amount: parseInt(getCountStocks(selectedStockLabel.value)),
+            price: selectedStockPrice.value,
+            date_buy: selectedStockDate.value
+        }
+
+        const result2 = await axios.put(BASE_API + 'list-brokers/update-stock/' + id, data, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer your-token'
+                }
+            })
 
 
     closeModal('sell');

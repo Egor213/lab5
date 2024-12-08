@@ -35,9 +35,9 @@ export class ListBrokersController {
         if (!('date_buy' in stockData) || !('label' in stockData) || !('price' in stockData) || !('amount' in stockData)) {
             console.log("Нет всех необходимых полей!");
             return { message: "Ошибка: поля отсутствуют!" };
-        }  
+        }   
         if (this.listBrokersServ.updateStocksData(stockData, id))
-            return { message: 'Акция обновлена!' };
+            return { message: 'Акция обновлена!' }; 
         else    
             return { error: 'Не удалось обновить акцию!'}
     } 

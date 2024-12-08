@@ -88,11 +88,16 @@ export class ListBrokersService {
         for (let user of this.brokers) {
             if (id == user.id) {
                 let isFound = false
-                for (let stock of user.stocks) {
+                for (let i = 0; i < user.stocks.length; i++) {
+                    let stock = user.stocks[i];
                     console.log(stock.label, data.label)
                     if (stock.label == data.label) {
                         isFound = true
                         stock.amount = data.amount
+                        if (stock.amount == 0) {
+                            user.stocks.splice(i, 1);
+                            break; 
+                        }
                         stock.date_buy = data.date_buy
                         stock.price = data.price == 'not change' ? stock.price : data.price
                     }
@@ -109,6 +114,7 @@ export class ListBrokersService {
         }        
         return this.saveJsonData(this.brokers)
     }
+    
 
 
     updateBalance(newBalance: number, id: number) {

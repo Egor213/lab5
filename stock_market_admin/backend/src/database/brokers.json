@@ -1,15 +1,9 @@
 [
   {
     "name": "Egor",
-    "balance": "55137.37",
+    "balance": "53585.9",
     "id": 2,
     "stocks": [
-      {
-        "label": "AAPL",
-        "date_buy": "2023-12-08",
-        "price": "193.63",
-        "amount": 1
-      },
       {
         "label": "CSCO",
         "date_buy": "2024-11-20",
@@ -18,9 +12,9 @@
       },
       {
         "amount": 10,
-        "date_buy": "2024-05-17",
-        "price": "75.185",
-        "label": "SBUX"
+        "date_buy": "2023-12-12",
+        "price": "193.11",
+        "label": "AAPL"
       }
     ]
   },
