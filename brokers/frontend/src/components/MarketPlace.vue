@@ -13,7 +13,7 @@
   
       <div v-if="broker" class="d-flex justify-content-between align-items-center border p-3 rounded bg-light mb-4">
         <span><strong>Доступные средства:</strong></span>
-        <span class="fs-5">{{ broker.balance.toLocaleString('en-US') }} $</span>
+        <span class="fs-5 open-sell">{{ broker.balance.toLocaleString('en-US') }} $</span>
       </div>
   
       <div class="stocks-list">
@@ -35,8 +35,8 @@
                     <tbody>
                         <tr v-for="([label, price], index) in Object.entries(stocks)" :key="index">
                             <td>{{ label }}</td>
-                            <td>{{ price.toLocaleString('en-US') }} $</td>
-                            <td>
+                            <td  class="price">{{ price.toLocaleString('en-US') }} $</td>
+                            <td class="benefit">
                                 {{ getBenefit(label, price).toLocaleString('en-US') }} $
                             </td>
                             <td>{{ getCountStocks(label) }}</td>
@@ -128,7 +128,7 @@
   </template>
   
 <script setup>
-import { nextTick, onUnmounted, ref } from "vue";
+import { onUnmounted, ref } from "vue";
 import Navigation from "./Navigation.vue";
 import axios from "axios";
 import { BASE_API } from "../constants";
@@ -187,21 +187,64 @@ socket.emit('connectAdminClient');
 
 socket.on('closeTrading', async () => {
   console.log('Торги завершились!');
+  localStorage.removeItem("all_dates")
+  localStorage.removeItem("all_stocks")
   all_dates = []
   all_stocks = []
   startTrading.value = false
   console.log(startTrading.value)
 });
 
+const getCountServ = async (label) => {
+  const id = localStorage.getItem("user")
+  const result = await axios.get(BASE_API + 'list-brokers/' + id);
+  for (let stock of result.data.stocks) {
+      if (stock.label == label) {
+        return stock.amount
+      }
+  }
+}
+const saveState = async (data) => {
+  
+  for (let label of Object.keys(data.stockPrices)) {
+    const count = await getCountServ(label)
+    const sendData = {
+      label: label,
+      price: data.stockPrices[label],
+      date_buy: data.currentDate,
+      amount: count
+    }
+    if (count > 0) {
+      const id = localStorage.getItem("user")
+    const result = await axios.put(BASE_API + 'list-brokers/update-stock/' + id, sendData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer your-token'
+                }
+            });
+  }
+    }
+    
+}
+
+
 let all_dates = [];
 let all_stocks = [];
-socket.on('tradeUpdate', (data) => {
+if ('all_dates' in localStorage) 
+  all_dates = JSON.parse(localStorage.getItem('all_dates'));
+if ('all_stocks' in localStorage) 
+  all_stocks = JSON.parse(localStorage.getItem('all_stocks'));
+
+socket.on('tradeUpdate', async (data) => {
   console.log(data);
+  await saveState(data)
   startTrading.value = true
   stocks.value = data.stockPrices
   all_stocks.push(data.stockPrices)
   currentDate.value = data.currentDate
   all_dates.push(data.currentDate)
+  localStorage.setItem('all_stocks', JSON.stringify(all_stocks));
+  localStorage.setItem('all_dates', JSON.stringify(all_dates));
 
   chartData.value = {
     labels: [...all_dates],
@@ -218,7 +261,6 @@ socket.on('tradeUpdate', (data) => {
 
 onUnmounted(() => {
   console.log('Отключение от сокета');
-
   socket.disconnect();
 });
 

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Login from './components/Login.vue';
 import Admin from './components/Admin.vue';
 import MarketPlace from './components/MarketPlace.vue';
-
+import NotFound from './components/NotFound.vue';
 const routes = [
     { path: '/', component: Login, name: 'Login' },
     { path: '/login', component: Login, name: 'Login' },
@@ -18,6 +18,11 @@ const routes = [
         name: 'market-place',
         meta: { requiresAuth: true },
     },
+    {
+      path: '/:pathMatch(.*)*',
+      component: NotFound,
+      name: 'NotFound',
+  },
 ];
 
 const router = createRouter({

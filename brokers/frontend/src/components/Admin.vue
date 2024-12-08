@@ -174,16 +174,15 @@ socket.on('closeTrading', async () => {
 });
 
 
-socket.on('tradeUpdate', (data) => {
+socket.on('tradeUpdate', async (data) => {
   if (isStartTrading.value == false) {
     stocksList.value = Object.keys(data.stockPrices)
     if (Object.keys(stocksList.value).length != 0) {
         isStartTrading.value = true
         loading.value = true
     }
-    
   }
-    
+  await saveState()
   console.log(data);
   currentDate.value = data.currentDate
 
